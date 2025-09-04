@@ -1,0 +1,20 @@
+.textbox {
+    /* TODO */
+    color: brown;
+}
+
+.canvas {
+    /* TODO */
+    width: 200px;
+    height: 200px;
+}
+
+.start {
+    /* TODO */
+    background-color: red;
+}
+
+.tokens {
+    /* TODO */
+    background-color: aqua;
+}

@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>LLM</title>
+
+        <!-- Import CSS -->
+        <link rel="stylesheet" href="./style.css">
+
+        <!-- Import scripts -->
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+        <script src="./scripts/llm.js"></script>
+    </head>
+    <body>
+        <input class="textbox" id="text" type="text" placeholder="Inserisci il testo" />
+
+        <button class="start" onclick="req_inference('text')">Predici la maschera</button>
+
+        <div class="tokens" id="tokens">
+        </div>
+
+        <div class="canvas">
+            <canvas id="plot-canvas"></canvas>
+        </div>
+    </body>
+</html>
