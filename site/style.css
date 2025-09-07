@@ -1,20 +1,38 @@
-.textbox {
-    /* TODO */
-    color: brown;
+:root {
+    --font-plain: 'Inter', sans-serif;
+
+    --font-weight-regular: 400;
+    --font-weight-semi-bold: 600;
+    --font-weight-bold: 700;
+
+    --color-primary: #455E91;
+    --color-on-primary: #FFFFFF;
+    --color-primary-container: #D9E2FF;
+    --color-on-primary-container: #2D4678;
+    --color-background: #FAF9FF;
+    --color-surface-variant: #E1E2EC;
+    --color-outline: #757780;
 }
 
-.canvas {
-    /* TODO */
-    width: 200px;
-    height: 200px;
+html,
+body {
+    margin: 0px;
+    padding: 0px;
+    background: var(--color-background);
 }
 
-.start {
-    /* TODO */
-    background-color: red;
-}
-
-.tokens {
-    /* TODO */
-    background-color: aqua;
+h1,
+h2,
+h3,
+h4,
+h5,
+h6,
+p {
+    /* TODO: Customize font family and sizes */
+    /* font-family: var(--font-plain); */
+    /* font-weight: var(--font-weight-regular); */
+    font-size: 1rem;
+    line-height: 1.5;
+    padding: 0;
+    margin: 0;
 }
