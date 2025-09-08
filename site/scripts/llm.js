@@ -4,25 +4,28 @@ function req_inference(id) {
     let text = document.getElementById(id).value
     console.warn(text)
 
-    window.setTimeout(() => {
-        let res = {
-            tokens: ['asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf'],
-            labels: ['a','b','c','d','e','f'],
-            conf: [12,23,43,65,2],
-        }
-
-        show_tokens('tokens', res.tokens)
-        plot_hist('plot-canvas', res.labels, res.conf)
-    }, 1000)
-    
-    /*let xmlHttp = new XMLHttpRequest();
+//     window.setTimeout(() => {
+//         let res = {
+//             tokens: ['asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf'],
+//             labels: ['a','b','c','d','e','f'],
+//             conf: [12,23,43,65,2],
+//         }
+//
+//         show_tokens('tokens', res.tokens)
+//         plot_hist('plot-canvas', res.labels, res.conf)
+//     }, 1000)
+//
+    let xmlHttp = new XMLHttpRequest();
     xmlHttp.onreadystatechange = function() { 
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            res = JSON.parse(xmlHttp.responseText)
-            plot_hist('plot-canvas', res.labels, res.conf)
+            console.log(xmlHttp.responseText)
+            var res = JSON.parse(xmlHttp.responseText)
+
+            show_tokens('tokens', res['tokens'])
+            plot_hist('plot-canvas', res['out-tokens'], res['conf'])
     }
-    xmlHttp.open("GET", theUrl, true); // true for asynchronous 
-    xmlHttp.send(text);*/
+    xmlHttp.open("GET", "http://172.0.0.1:5000/predict", true); // true for asynchronous
+    xmlHttp.send(text);
 }
 
 
