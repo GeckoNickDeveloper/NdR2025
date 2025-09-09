@@ -17,69 +17,78 @@
   <h2>Draw on the canvas</h2>
   <canvas id="canvas" width="280" height="280"></canvas>
   <div id="controls">
-    <button id="clear">Clear</button>
+    <button id="clear" onclick="clear()">Clear</button>
   </div>
-  <pre id="output"></pre>
+
+
 
   <script>
-    const canvas = document.getElementById("canvas");
-    const ctx = canvas.getContext("2d");
-    const clearBtn = document.getElementById("clear");
-    const output = document.getElementById("output");
+    // Add event listener to clear b tn
+    var btn = document.getElementById('clear')
+    btn.addEventListener('click', clear)
 
-    // Setup drawing
-    ctx.fillStyle = "white";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.strokeStyle = "black";
-    ctx.lineWidth = 15;
-    ctx.lineCap = "round";
+    // create canvas element and append it to document body
+    /*var canvas = document.createElement('canvas');
+    document.body.appendChild(canvas);
 
-    let drawing = false;
+    // some hotfixes... ( ≖_≖)
+    document.body.style.margin = 0;
+    canvas.style.position = 'fixed';
 
-    canvas.addEventListener("mousedown", () => drawing = true);
-    canvas.addEventListener("mouseup", () => {
-      drawing = false;
-      sendToServer();
-    });
-    canvas.addEventListener("mouseleave", () => drawing = false);
+    // get canvas 2D context and set him correct size*/
+    // TODO: fix offset in drawing
+    var canvas = document.getElementById('canvas')
+    var ctx = canvas.getContext('2d');
+    resize();
 
-    canvas.addEventListener("mousemove", (e) => {
-      if (!drawing) return;
-      const rect = canvas.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      ctx.lineTo(x, y);
-      ctx.stroke();
-      ctx.beginPath();
-      ctx.moveTo(x, y);
-    });
+    let send = false
 
-    clearBtn.addEventListener("click", () => {
-      ctx.fillStyle = "white";
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-      ctx.beginPath();
-    });
+    // last known position
+    var pos = { x: 0, y: 0 };
 
-    function preprocessCanvas() {
-      // Get image from canvas
-      const tmpCanvas = document.createElement("canvas");
-      tmpCanvas.width = 28;
-      tmpCanvas.height = 28;
-      const tmpCtx = tmpCanvas.getContext("2d");
+    window.addEventListener('resize', resize);
+    document.addEventListener('mousemove', draw);
+    document.addEventListener('mousedown', setPosition);
+    document.addEventListener('mouseenter', setPosition);
 
-      // Draw scaled-down version
-      tmpCtx.drawImage(canvas, 0, 0, 28, 28);
+    // new position from mouse event
+    function setPosition(e) {
+      pos.x = e.clientX;
+      pos.y = e.clientY;
+    }
 
-      // Get pixel data and normalize [0,1]
-      const imgData = tmpCtx.getImageData(0, 0, 28, 28).data;
-      let gray = [];
-      for (let i = 0; i < imgData.length; i += 4) {
-        // Grayscale using red channel (since it's black & white)
-        const val = imgData[i];
-        // Normalize: white=0, black=1
-        gray.push((255 - val) / 255.0);
-      }
-      return gray;
+    // resize canvas
+    function resize() {
+      ctx.canvas.width = window.innerWidth;
+      ctx.canvas.height = window.innerHeight;
+    }
+
+    function draw(e) {
+      // mouse left button must be pressed
+      if (e.buttons !== 1) return;
+
+      send = true
+
+      ctx.beginPath(); // begin
+
+      ctx.lineWidth = 5;
+      ctx.lineCap = 'round';
+      ctx.strokeStyle = '#1f1f1f';
+
+      ctx.moveTo(pos.x, pos.y); // from
+      setPosition(e);
+      ctx.lineTo(pos.x, pos.y); // to
+
+      ctx.stroke(); // draw it!
+
+      send = false
+    }
+
+    function clear() {
+      console.log('clear')
+      var canvas = document.getElementById('canvas')
+      var ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     }
 
     function sendToServer() {
@@ -104,6 +113,18 @@
       // Send space-separated values
       xhr.send(features.join(" "));*/
     }
+
+
+    setInterval(() => {
+        if (send) {
+          var canvas = document.getElementById('canvas')
+          var ctx = canvas.getContext('2d');
+
+          img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+
+          console.warn(img);
+        }
+    }, 750)
   </script>
 </body>
 </html>
