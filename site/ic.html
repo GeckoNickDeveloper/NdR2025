@@ -36,7 +36,6 @@
     canvas.style.position = 'fixed';
 
     // get canvas 2D context and set him correct size*/
-    // TODO: fix offset in drawing
     var canvas = document.getElementById('canvas')
     var ctx = canvas.getContext('2d');
     resize();
@@ -51,10 +50,14 @@
     document.addEventListener('mousedown', setPosition);
     document.addEventListener('mouseenter', setPosition);
 
+    // Get canvas position
+    var rect = canvas.getBoundingClientRect();
+
     // new position from mouse event
     function setPosition(e) {
-      pos.x = e.clientX;
-      pos.y = e.clientY;
+      // Removing rect position fixes the offset
+      pos.y = e.clientY - rect.top;
+      pos.x = e.clientX - rect.left;
     }
 
     // resize canvas
