@@ -1,5 +1,60 @@
 
 
+// Request data
+async function requestInference() {
+    const url = "http://127.0.0.1:5000/api/llm"
+
+    // Get text from input field
+    const text = document.getElementById('chat-input').value;
+    console.warn(text);
+
+    try {
+        const res = await fetch(url, {
+            method: "POST",
+            body: text,
+            headers: {
+                "Content-Type": "plain/text",
+            },
+        });
+
+        if (!res.ok) {
+            throw new Error(`Response status: ${response.status}`);
+        }
+
+        // Get JSON response
+        const response = await res.json();
+        console.log(result);
+
+        // Perform actions
+        show_tokens('tokens', response['tokens'])
+        plot_hist('plot-canvas', response['out-tokens'], response['conf'])
+
+    } catch {
+        console.error(error.message);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function req_inference(id) {
     let text = document.getElementById(id).value
     console.warn(text)
@@ -21,8 +76,7 @@ function req_inference(id) {
             console.log(xmlHttp.responseText)
             var res = JSON.parse(xmlHttp.responseText)
 
-            show_tokens('tokens', res['tokens'])
-            plot_hist('plot-canvas', res['out-tokens'], res['conf'])
+            
     }
     xmlHttp.open("GET", "http://172.0.0.1:5000/predict", true); // true for asynchronous
     xmlHttp.send(text);
