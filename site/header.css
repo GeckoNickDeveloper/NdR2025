@@ -1,0 +1,17 @@
+header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 32px;
+
+    padding: 14px;
+    background: var(--color-primary-container);
+}
+
+.header-title {
+    color: var(--color-on-primary-container);
+
+    font-family: var(--font-plain);
+    font-weight: var(--font-weight-semi-bold);
+    font-size: 28px;
+}
