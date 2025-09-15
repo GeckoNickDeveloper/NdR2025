@@ -25,6 +25,7 @@ function init() {
     clearBtn = document.getElementById('clear');
 
     // resize(); // Must
+    clearCanvas()
 
     // Elements event callbacks
     clearBtn.addEventListener('click', clearCanvas)
@@ -42,7 +43,7 @@ function init() {
 
     // Set intervall
     setInterval(inferenceCallback, 1_000);
-    setInterval(standbyCallback, 5_000); // Set send to false after 10s
+    setInterval(standbyCallback, 2_000); // Set send to false after 10s
 }
 
 
@@ -96,6 +97,7 @@ function setPosition(e) {
 function resize() {
     ctx.canvas.width = window.innerWidth;
     ctx.canvas.height = window.innerHeight;
+    clearCanvas()
 }
 
 // Draw on canvas
@@ -107,9 +109,9 @@ function draw(e) {
 
     ctx.beginPath(); // begin
 
-    ctx.lineWidth = 5;
+    ctx.lineWidth = 1;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#1f1f1f';
+    ctx.strokeStyle = '#000' //'#1f1f1f';
 
     ctx.moveTo(pos.x, pos.y); // from
     setPosition(e);
@@ -123,6 +125,9 @@ function draw(e) {
 function clearCanvas() {
     console.log('clear')
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
 
