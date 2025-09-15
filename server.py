@@ -116,8 +116,37 @@ def llm_inference(text):
 
 
 def sketch_inference(image):
-    return {'todo': 'implement'}
-    pass
+    # Infer result
+    inputs = sketch_processor(images=image, return_tensors="pt")
+    outputs = sketch_model(**inputs)
+    logits = outputs.logits
+
+    # Get most confident class
+    # best_guess = { 'label': None, 'conf': 0.0 }
+
+    predicted_class_idx = logits.argmax(-1).item()
+    predicted_class_label = sketch_model.config.id2label[predicted_class_idx]
+
+
+    softmax = torch.nn.functional.softmax(logits[0, :], dim=-1)
+
+    confs, idxs = torch.topk(softmax, 5)#.tolist()
+
+    # print(confs, idxs)
+
+    top_5 = []
+    for i in range(len(confs)):
+        top_5.append({
+            'label': sketch_model.config.id2label[idxs[i].item()],
+            'conf': (confs[i].item() * 100.0)
+        })
+        
+        # print(f"{sketch_model.config.id2label[idxs[i].item()]} | confidence: {(confs[i].item() * 100.0):.4f}")
+
+    return {
+        'best': predicted_class_label,
+        'top': top_5
+    }
 
 
 

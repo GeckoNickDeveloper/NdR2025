@@ -24,7 +24,7 @@ function init() {
     ctx = canvas.getContext('2d');
     clearBtn = document.getElementById('clear');
 
-    resize(); // Must
+    // resize(); // Must
 
     // Elements event callbacks
     clearBtn.addEventListener('click', clearCanvas)
@@ -41,7 +41,7 @@ function init() {
     document.addEventListener('mouseenter', setPosition);
 
     // Set intervall
-    setInterval(inferenceCallback, 600);
+    setInterval(inferenceCallback, 1_000);
     setInterval(standbyCallback, 5_000); // Set send to false after 10s
 }
 
@@ -73,6 +73,8 @@ async function requestInference(img) {
         // Perform actions
             // Draw chart
             // Write text
+        // document.getElementById("best-class").innerHTML = `${response[0][0]['label']} - (${response[0][0]['conf']})`
+        document.getElementById("best-class").innerHTML = `${response[0]['best']}`
 
     } catch (error) {
         console.error(error.message);
@@ -131,7 +133,7 @@ function inferenceCallback() {
     if (sendFlag) {
         console.info('Timed callback - Sending')
         
-        canvas.toBlob((blob) => requestInference(blob), "image/png")
+        canvas.toBlob((blob) => requestInference(blob), "image/jpeg")
         // img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
         
 
