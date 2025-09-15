@@ -5,10 +5,7 @@
     justify-content: center;
     gap: 10px;
 
-    /* width: 100%; */
     max-width: 900px;
-
-    background: blue;
 }
 
 .token-container {
