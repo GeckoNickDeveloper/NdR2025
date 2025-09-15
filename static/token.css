@@ -1,0 +1,38 @@
+.tokens-container {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
+
+    /* width: 100%; */
+    max-width: 900px;
+
+    background: blue;
+}
+
+.token-container {
+    width: fit-content;
+    height: fit-content;
+
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    background: red;
+    padding: 10px 16px;
+    color: white;
+    border-radius: 12px;
+}
+
+.token-text {
+    font-family: var(--font-plain);
+    font-weight: var(--font-weight-bold);
+    font-size: 18px;
+}
+
+.token-id {
+    font-family: var(--font-plain);
+    font-size: 10px;
+    font-weight: var(--font-weight-regular);
+}

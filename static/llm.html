@@ -6,6 +6,9 @@
 
     <!-- Import CSS -->
     <link rel="stylesheet" href="./style.css">
+    <link rel="stylesheet" href="./header.css">
+    <link rel="stylesheet" href="./chat.css">
+    <link rel="stylesheet" href="./token.css">
 
     <!-- Import scripts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,33 +23,38 @@
 
 <body>
     <header>
-        <div class="header-container">
-            <div style="height: 80px; width: 80px; background: blue;"></div>
-            <div style="height: 80px; width: 60px; background: purple;"></div>
-            <p class="header-title">Scopriamo l'intelligenza artificiale - LLM</p>
-        </div>
+        <div style="height: 80px; width: 80px; background: blue;"></div>
+        <div style="height: 80px; width: 60px; background: purple;"></div>
+        <p class="header-title">Scopriamo l'intelligenza artificiale - LLM</p>
     </header>
-    <div class="chat-container">
-        <div class="chat-input-container">
-            <input class="chat-input-textarea" id="chat-input" name="chat-input" placeholder="Scrivi qualcosa..."
-                type="text">
+    <div class="page-content">
+        <div class="plot-container">
+            <div class="plot-element">
+                <canvas id="plot-canvas">Questo browser non supporta elementi canvas.</canvas>
+            </div>
         </div>
-        <button class="chat-submit-btn">
-            <span class="material-icons md-24">send</span>
-        </button>
-    </div>
-    <div class="tokens-container">
-        <div class="token-container">
-            <p class="token-text">Text</p>
-            <p class="token-id">1234</p>
-        </div>
-        <div class="token-container">
-            <p class="token-text">Text</p>
-            <p class="token-id">1234</p>
-        </div>
-        <div class="token-container">
-            <p class="token-text">Text</p>
-            <p class="token-id">1234</p>
+
+        <div class="bottom-elements">
+            <div id="tokens-list" class="tokens-container">
+                <div class="token-container">
+                    <p class="token-text">Text</p>
+                    <p class="token-id">1234</p>
+                </div>
+                <div class="token-container">
+                    <p class="token-text">Text</p>
+                    <p class="token-id">1234</p>
+                </div>
+            </div>
+
+            <div class="chat-container">
+                <div class="chat-input-container">
+                    <input class="chat-input-textarea" id="chat-input" name="chat-input"
+                        placeholder="Scrivi qualcosa..." type="text">
+                </div>
+                <button class="chat-submit-btn" onclick="process_text()">
+                    <span class="material-icons md-24">send</span>
+                </button>
+            </div>
         </div>
     </div>
 
@@ -54,98 +62,6 @@
     
 </body>
 
-<style>
-    header {
-        background: red;
-    }
-
-    .header-container {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: 32px;
-        padding: 14px;
-
-        background: var(--color-primary-container);
-    }
-
-    .header-title {
-        color: var(--color-on-primary-container);
-        font-family: var(--font-plain);
-        font-weight: var(--font-weight-semi-bold);
-        font-size: 28px;
-    }
-
-    .chat-container {
-        width: 500px;
-        display: flex;
-        flex-direction: row;
-        background: var(--color-surface-variant);
-        border-radius: 22px;
-        padding: 12px;
-        gap: 12px;
-    }
-
-    .chat-input-container {
-        width: 100%;
-        height: fit-content;
-        align-items: center;
-        display: flex;
-        min-height: 32px;
-        padding: 8px 12px;
-        border: 1px solid var(--color-outline);
-        border-radius: 10px;
-    }
-
-    .chat-input-textarea {
-        width: 100%;
-        border: none;
-        outline: none;
-        background: var(--color-surface-variant);
-    }
-
-    .chat-submit-btn {
-        flex: 0 0 auto;
-        width: 48px;
-        height: 48px;
-        color: var(--color-on-primary);
-        background: var(--color-primary);
-        border: none;
-        border-radius: 10px;
-        cursor: pointer;
-    }
-
-    .tokens-container {
-        display: flex;
-        flex-direction: row;
-        flex-wrap: wrap;
-        gap: 10px;
-        width: 100%;
-    }
-
-    .token-container {
-        width: fit-content;
-        height: fit-content;
-        display: flex;
-        flex-direction: column;
-        background: red;
-        padding: 10px 16px;
-        gap: 4px;
-        color: white;
-        border-radius: 12px;
-    }
-
-    .token-text {
-        font-family: var(--font-plain);
-        font-weight: var(--font-weight-bold);
-        font-size: 18px;
-    }
-
-    .token-id {
-        font-family: var(--font-plain);
-        font-size: 10px;
-        font-weight: var(--font-weight-regular);
-    }
-</style>
+<script>plot_hist('plot-canvas', ['a', 'b', 'c'], [10, 20, 30])</script>
 
 </html>
