@@ -75,7 +75,7 @@ async function requestInference(img) {
             // Draw chart
             // Write text
         // document.getElementById("best-class").innerHTML = `${response[0][0]['label']} - (${response[0][0]['conf']})`
-        document.getElementById("best-class").innerHTML = `${response[0]['best']}`
+        document.getElementById("best-class").innerHTML = `${response[0]['top'][0]['label']}`
 
     } catch (error) {
         console.error(error.message);
