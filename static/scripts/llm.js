@@ -1,4 +1,259 @@
+/*
+ * Initialize the script for the whole page.
+ */
+function init_script() {
+    // Initialize the plot
+    create_plot();
 
+    // Set event listener for the chat input
+    document.getElementById('chat-input').addEventListener('keyup', (e) => {
+        // Process input text when pressing enter
+        if (e.key === 'Enter') {
+            process_text();
+        }
+    });
+}
+
+async function fake_server(text) {
+    await new Promise(r => setTimeout(r, 1000));
+
+    const split_text = text.split(' ');
+    const tokens = split_text.map((t) => {
+        return {
+            'id': Math.floor(Math.random() * 100),
+            'text': t
+        };
+    });
+    const pred_tokens = "Lorem Sed ut perspiciatis unde"
+        .split(' ')
+        .map((e) => {
+            return {
+                'id': Math.floor(Math.random() * 100),
+                'text': e,
+                'confidence': Math.random() * 100
+            };
+        });
+    return {
+        'tokens': tokens,
+        'prediction': pred_tokens
+    };
+}
+
+/*
+ * Process the text inserted by the user in the chat input.
+ *
+ * This function is responsible of processing the text
+ * inserted by the user into the chat box calling the
+ * LLM api and displaying the tokens and the chart.
+ *
+ * Note: If the input text is empty the processing is
+ * not performed.
+ */
+async function process_text() {
+    let text = document.getElementById('chat-input').value;
+    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec auctor est."
+
+    // skip processing empty text
+    if (!text || text.length === 0) {
+        return
+    }
+
+    // reset the input text
+    document.getElementById('chat-input').value = "";
+    console.log(`input: ${text}`);
+
+    try {
+        // get tokens from server
+        const response = await fake_server(text);
+        const tokens = response['tokens'];
+        const pred_tokens = response['prediction'];
+
+        // assign color to tokens
+        tokens.forEach((e) => { e.color = get_token_color(e) });
+        pred_tokens.forEach((e) => { e.color = get_token_color(e) });
+
+        // sort predictions by confidence
+        pred_tokens.sort((a, b) => {
+            if (a.confidence < b.confidence) {
+                return -1;
+            } else if (a.confidence > b.confidence) {
+                return 1;
+            } else {
+                return 0;
+            }
+        });
+        pred_tokens.reverse();
+
+        // display tokens and predictions
+        display_tokens(tokens);
+        update_plot(pred_tokens);
+
+        console.log('processed');
+        console.log(tokens);
+        console.log(pred_tokens);
+    } catch (error) {
+        console.error(error);
+    }
+}
+
+/*
+ * Return the color associated to the given token.
+ */
+let tokens_color_map = {}
+function get_token_color(token) {
+    if (token.text in tokens_color_map) {
+        return tokens_color_map[token.text];
+    }
+    const c = get_random_color();
+    tokens_color_map[token.text] = c;
+    return c;
+}
+
+/*
+ * Return a random good-looking color as an RGB hex string.
+ */
+function get_random_color() {
+    // Code stolen from here: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically
+    const golden_ratio_conjugate = 0.618033988749895;
+    let h = Math.random();
+    // h += golden_ratio_conjugate;
+    // h %= 1;
+    return hsv_to_rgb(h, 0.5, 0.90);
+}
+
+/*
+ * Convert a color expressed in HSV into a RGB hex string.
+ */
+function hsv_to_rgb(h, s, v) {
+    let r, g, b;
+    let i, f, p, q, t;
+
+    i = Math.floor(h * 6);
+    f = h * 6 - i;
+    p = v * (1 - s);
+    q = v * (1 - f * s);
+    t = v * (1 - (1 - f) * s);
+
+    switch (i % 6) {
+        case 0: r = v, g = t, b = p; break;
+        case 1: r = q, g = v, b = p; break;
+        case 2: r = p, g = v, b = t; break;
+        case 3: r = p, g = q, b = v; break;
+        case 4: r = t, g = p, b = v; break;
+        case 5: r = v, g = p, b = q; break;
+    }
+    r = Math.round(r * 255);
+    g = Math.round(g * 255);
+    b = Math.round(b * 255);
+
+    // Format RGB hex string
+    r = r.toString(16);
+    g = g.toString(16);
+    b = b.toString(16);
+    if (r.length == 1)
+        r = "0" + r;
+    if (g.length == 1)
+        g = "0" + g;
+    if (b.length == 1)
+        b = "0" + b;
+    return "#" + r + g + b;
+}
+
+/* 
+ * Show a given list of tokens into the page.
+ *
+ * Parameters:
+ *   tokens: list of objects with: `id`, `text`, `color`.
+ */
+function display_tokens(tokens) {
+    const tokens_element = document.getElementById('tokens-list');
+    tokens_element.innerHTML = "";
+
+    tokens.forEach((token) => {
+        const t_container = document.createElement('div');
+        t_container.className = 'token-container'
+        t_container.style.background = token.color;
+
+        const t_text = document.createElement('p');
+        t_text.className = 'token-text';
+        t_text.textContent = token.text;
+
+        const t_id = document.createElement('p');
+        t_id.className = 'token-id';
+        t_id.textContent = token.id;
+
+        t_container.appendChild(t_text);
+        t_container.appendChild(t_id);
+        tokens_element.appendChild(t_container);
+    });
+}
+
+/*
+* Create the plot without setting any data.
+*/
+let plot_chart;
+function create_plot() {
+    const plot_canvas = document.getElementById('plot-canvas')
+    const config = {
+        type: 'bar',
+        data: {
+            labels: [],
+            datasets: [{
+                label: 'Confidenza',
+                data: [],
+                borderRadius: 5
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            scales: {
+                x: {
+                    type: 'linear',
+                    min: 0,
+                    max: 100,
+                    ticks: {
+                        font: {
+                            size: 20
+                        }
+                    }
+                },
+                y: {
+                    ticks: {
+                        font: {
+                            size: 20
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        font: {
+                            size: 25
+                        }
+                    },
+                    display: true
+                }
+            },
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    }
+    plot_chart = new Chart(plot_canvas, config);
+}
+
+/*
+ * Update the plot with the given predicted tokens.
+ */
+function update_plot(pred_tokens) {
+    const labels = pred_tokens.map((e) => { return e.text });
+    const data = pred_tokens.map((e) => { return e.confidence });
+    const color = pred_tokens.map((e) => { return e.color });
+    plot_chart.data.labels = labels;
+    plot_chart.data.datasets[0].data = data;
+    plot_chart.data.datasets[0].backgroundColor = color;
+    plot_chart.update();
+}
 
 // Request data
 async function requestInference() {
@@ -59,82 +314,25 @@ function req_inference(id) {
     let text = document.getElementById(id).value
     console.warn(text)
 
-//     window.setTimeout(() => {
-//         let res = {
-//             tokens: ['asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf'],
-//             labels: ['a','b','c','d','e','f'],
-//             conf: [12,23,43,65,2],
-//         }
-//
-//         show_tokens('tokens', res.tokens)
-//         plot_hist('plot-canvas', res.labels, res.conf)
-//     }, 1000)
-//
+    //     window.setTimeout(() => {
+    //         let res = {
+    //             tokens: ['asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf'],
+    //             labels: ['a','b','c','d','e','f'],
+    //             conf: [12,23,43,65,2],
+    //         }
+    //
+    //         show_tokens('tokens', res.tokens)
+    //         plot_hist('plot-canvas', res.labels, res.conf)
+    //     }, 1000)
+    //
     let xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function() { 
+    xmlHttp.onreadystatechange = function () {
         if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
             console.log(xmlHttp.responseText)
-            var res = JSON.parse(xmlHttp.responseText)
+        var res = JSON.parse(xmlHttp.responseText)
 
             
     }
     xmlHttp.open("GET", "http://172.0.0.1:5000/predict", true); // true for asynchronous
     xmlHttp.send(text);
-}
-
-
-
-function randColor() {
-    let letters = '6789ABCDEF'
-    let color = '#'
-
-    for(let i = 0; i < 6; ++i) {
-        color += letters[Math.floor(Math.random() * 10)]
-    }
-
-    return color
-}
-
-
-function show_tokens(id, tokens) {
-    const ctx = document.getElementById(id)
-
-    tokens.forEach(t => {
-        let item = `<span style="background-color:${randColor()}"> ${t} </span> `
-        
-        ctx.innerHTML += item
-    });
-}
-
-function plot_hist(id, labels, data) {
-    const ctx = document.getElementById(id)
-    const cfg = {
-        type: 'bar',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: 'Confidenza',
-                data: data
-            }]
-        },
-        options: {
-            scales: {
-                y: {
-                    type: 'linear',
-                    min: 0,
-                    max: 100
-                }
-            },
-            responsive: true,
-            maintainAspectRatio: false,
-            
-            plugins: {
-                legend: {
-                    display: false
-                }
-            }
-        }
-    }
-
-    new Chart(ctx, cfg)
 }
