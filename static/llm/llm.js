@@ -14,6 +14,12 @@ function init_script() {
     });
 }
 
+class MissingMaskError extends Error {
+    constructor() {
+        super("input text is missing [MASK]");
+    }
+}
+
 /*
  * Query the server for an object with predicted tokens.
  */
@@ -27,7 +33,11 @@ async function fetch_tokens(text) {
     });
 
     if (!res.ok) {
-        throw new Error(`Response status: ${res.status}`);
+        if (res.status == 418) {
+            throw new MissingMaskError();
+        } else {
+            throw new Error(`${res.status} - ${res.statusText}`);
+        }
     }
 
     // Get JSON response
@@ -48,15 +58,12 @@ async function fetch_tokens(text) {
 async function process_text() {
     let text = document.getElementById('chat-input').value;
     // text = "Lorem ipsum dolor sit amet, [MASK] adipiscing elit."
+    console.log(`input: ${text}`);
 
     // skip processing empty text
     if (!text || text.length === 0) {
         return
     }
-
-    // reset the input text
-    document.getElementById('chat-input').value = "";
-    console.log(`input: ${text}`);
 
     try {
         // get tokens from server
@@ -84,12 +91,16 @@ async function process_text() {
         display_tokens(tokens);
         update_plot(pred_tokens);
 
-        console.log('processed');
-        console.log(tokens);
-        console.log(pred_tokens);
+        // reset the input text
+        document.getElementById('chat-input').value = "";
     } catch (error) {
         console.error(error);
-        alert('Inserire una maschera con [MASK]');
+
+        if (error instanceof MissingMaskError) {
+            alert('Il testo deve contenere la maschera [MASK]');
+        } else {
+            alert(`Errore sconosciuto ${error}`);
+        }
     }
 }
 
@@ -191,6 +202,9 @@ function display_tokens(tokens) {
 let plot_chart;
 function create_plot() {
     const plot_canvas = document.getElementById('plot-canvas')
+    // Hide plot by default
+    plot_canvas.style.visibility = 'hidden';
+
     const config = {
         type: 'bar',
         data: {
@@ -243,6 +257,9 @@ function create_plot() {
  * Update the plot with the given predicted tokens.
  */
 function update_plot(pred_tokens) {
+    // Make plot visible
+    document.getElementById('plot-canvas').style.visibility = 'visible';
+
     const labels = pred_tokens.map((e) => { return e.text });
     const data = pred_tokens.map((e) => { return e.confidence });
     const color = pred_tokens.map((e) => { return e.color });
@@ -250,86 +267,4 @@ function update_plot(pred_tokens) {
     plot_chart.data.datasets[0].data = data;
     plot_chart.data.datasets[0].backgroundColor = color;
     plot_chart.update();
-}
-
-// Request data
-async function requestInference() {
-    const url = "http://127.0.0.1:5000/api/llm"
-
-    // Get text from input field
-    const text = document.getElementById('chat-input').value;
-    console.warn(text);
-
-    try {
-        const res = await fetch(url, {
-            method: "POST",
-            body: text,
-            headers: {
-                "Content-Type": "plain/text",
-            },
-        });
-
-        if (!res.ok) {
-            throw new Error(`Response status: ${response.status}`);
-        }
-
-        // Get JSON response
-        const response = await res.json();
-        console.log(result);
-
-        // Perform actions
-        show_tokens('tokens', response['tokens'])
-        plot_hist('plot-canvas', response['out-tokens'], response['conf'])
-
-    } catch {
-        console.error(error.message);
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function req_inference(id) {
-    let text = document.getElementById(id).value
-    console.warn(text)
-
-    //     window.setTimeout(() => {
-    //         let res = {
-    //             tokens: ['asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf', 'asdf'],
-    //             labels: ['a','b','c','d','e','f'],
-    //             conf: [12,23,43,65,2],
-    //         }
-    //
-    //         show_tokens('tokens', res.tokens)
-    //         plot_hist('plot-canvas', res.labels, res.conf)
-    //     }, 1000)
-    //
-    let xmlHttp = new XMLHttpRequest();
-    xmlHttp.onreadystatechange = function () {
-        if (xmlHttp.readyState == 4 && xmlHttp.status == 200)
-            console.log(xmlHttp.responseText)
-        var res = JSON.parse(xmlHttp.responseText)
-
-
-    }
-    xmlHttp.open("GET", "http://172.0.0.1:5000/predict", true); // true for asynchronous
-    xmlHttp.send(text);
 }
