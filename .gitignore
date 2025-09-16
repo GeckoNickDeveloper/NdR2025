@@ -3,3 +3,4 @@ bert-base-italian-xxl-cased/
 server/
 models/
 .DS_Store
+__pycache__/

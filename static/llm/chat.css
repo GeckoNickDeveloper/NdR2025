@@ -53,3 +53,8 @@
     border-radius: 5px;
     transition: all 0.1s ease-in-out;
 }
+
+.chat-submit-btn-icon {
+    width: 24px;
+    height: 24px;
+}

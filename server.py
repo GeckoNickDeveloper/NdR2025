@@ -145,11 +145,11 @@ CORS(app)  # Enable CORS for all routes
 
 @app.route("/llm")
 def llm_page():
-    return send_from_directory(app.static_folder, 'llm.html')
+    return send_from_directory(app.static_folder, 'llm/index.html')
 
 @app.route("/sketch")
 def sketch_page():
-    return send_from_directory(app.static_folder, 'sketch.html')
+    return send_from_directory(app.static_folder, 'sketch/index.html')
 
 @app.route("/<path:filename>")
 def static_content(filename):

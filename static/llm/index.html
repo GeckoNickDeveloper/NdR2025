@@ -5,21 +5,15 @@
     <title>LLM</title>
 
     <!-- Import CSS -->
-    <link rel="stylesheet" href="./style.css">
-    <link rel="stylesheet" href="./header.css">
-    <link rel="stylesheet" href="./chat.css">
-    <link rel="stylesheet" href="./token.css">
-    <link rel="stylesheet" href="./plot.css">
+    <link rel="stylesheet" href="llm/style.css">
+    <link rel="stylesheet" href="llm/header.css">
+    <link rel="stylesheet" href="llm/chat.css">
+    <link rel="stylesheet" href="llm/token.css">
+    <link rel="stylesheet" href="llm/plot.css">
 
     <!-- Import scripts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Libre+Franklin:ital,wght@0,100..900;1,100..900&display=swap"
-        rel="stylesheet">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="./scripts/llm.js"></script>
+    <script src="llm/chart.js"></script>
+    <script src="llm/llm.js"></script>
 </head>
 
 <body>
@@ -44,14 +38,11 @@
                         placeholder="Scrivi qualcosa..." type="text">
                 </div>
                 <button class="chat-submit-btn" onclick="process_text()">
-                    <span class="material-icons md-24">send</span>
+                    <img class="chat-submit-btn-icon" src="assets/send_icon.svg"/>
                 </button>
             </div>
         </div>
     </div>
-
-
-    
 </body>
 
 <script>init_script()</script>
