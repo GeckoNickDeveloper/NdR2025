@@ -14,29 +14,25 @@ function init_script() {
     });
 }
 
-async function fake_server(text) {
-    await new Promise(r => setTimeout(r, 1000));
+/*
+ * Query the server for an object with predicted tokens.
+ */
+async function fetch_tokens(text) {
+    const url = "http://127.0.0.1:4200/api/llm"
 
-    const split_text = text.split(' ');
-    const tokens = split_text.map((t) => {
-        return {
-            'id': Math.floor(Math.random() * 100),
-            'text': t
-        };
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: text,
     });
-    const pred_tokens = "Lorem Sed ut perspiciatis unde"
-        .split(' ')
-        .map((e) => {
-            return {
-                'id': Math.floor(Math.random() * 100),
-                'text': e,
-                'confidence': Math.random() * 100
-            };
-        });
-    return {
-        'tokens': tokens,
-        'prediction': pred_tokens
-    };
+
+    if (!res.ok) {
+        throw new Error(`Response status: ${res.status}`);
+    }
+
+    // Get JSON response
+    const response = await res.json();
+    return response;
 }
 
 /*
@@ -51,7 +47,7 @@ async function fake_server(text) {
  */
 async function process_text() {
     let text = document.getElementById('chat-input').value;
-    text = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec auctor est. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed nec auctor est."
+    // text = "Lorem ipsum dolor sit amet, [MASK] adipiscing elit."
 
     // skip processing empty text
     if (!text || text.length === 0) {
@@ -64,9 +60,9 @@ async function process_text() {
 
     try {
         // get tokens from server
-        const response = await fake_server(text);
+        const response = await fetch_tokens(text);
         const tokens = response['tokens'];
-        const pred_tokens = response['prediction'];
+        const pred_tokens = response['predictions'];
 
         // assign color to tokens
         tokens.forEach((e) => { e.color = get_token_color(e) });
@@ -93,6 +89,7 @@ async function process_text() {
         console.log(pred_tokens);
     } catch (error) {
         console.error(error);
+        alert('Inserire una maschera con [MASK]');
     }
 }
 
@@ -116,9 +113,9 @@ function get_random_color() {
     // Code stolen from here: https://martin.ankerl.com/2009/12/09/how-to-create-random-colors-programmatically
     const golden_ratio_conjugate = 0.618033988749895;
     let h = Math.random();
-    // h += golden_ratio_conjugate;
-    // h %= 1;
-    return hsv_to_rgb(h, 0.5, 0.90);
+    h += golden_ratio_conjugate;
+    h %= 1;
+    return hsv_to_rgb(h, 0.60, 0.75);
 }
 
 /*
@@ -331,7 +328,7 @@ function req_inference(id) {
             console.log(xmlHttp.responseText)
         var res = JSON.parse(xmlHttp.responseText)
 
-            
+
     }
     xmlHttp.open("GET", "http://172.0.0.1:5000/predict", true); // true for asynchronous
     xmlHttp.send(text);

@@ -54,7 +54,7 @@ function init() {
 
 // Request data
 async function requestInference(img) {
-    const url = "http://127.0.0.1:5000/api/sketch"
+    const url = "http://127.0.0.1:4200/api/sketch"
 
     try {
         const res = await fetch(url, {

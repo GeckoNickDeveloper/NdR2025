@@ -25,7 +25,7 @@
 .token-text {
     font-family: var(--font-plain);
     font-weight: var(--font-weight-bold);
-    font-size: 18px;
+    font-size: 12px;
 }
 
 .token-id {
