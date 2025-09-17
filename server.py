@@ -85,7 +85,7 @@ def process_sketch():
     try:
         # Open with PIL
         img = Image.open(request.stream).convert("RGB")
-        print(f"Sketch: {img=}")
+        print(f"{img.width=} {img.height}")
         inference_result = sketch_inference(img)
         return jsonify(inference_result, 200)
     except Exception as e:
@@ -101,8 +101,7 @@ def sketch_inference(image):
     # best_guess = { 'label': None, 'conf': 0.0 }
 
     predicted_class_idx = logits.argmax(-1).item()
-    predicted_class_label = sketch_model.config.id2label[predicted_class_idx]
-
+    
     softmax = torch.nn.functional.softmax(logits[0, :], dim=-1)
     confs, idxs = torch.topk(softmax, 5)#.tolist()
 

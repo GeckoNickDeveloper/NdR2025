@@ -15,3 +15,7 @@ header {
     font-weight: var(--font-weight-semi-bold);
     font-size: 28px;
 }
+
+.header-logo {
+    height: 80px;
+}

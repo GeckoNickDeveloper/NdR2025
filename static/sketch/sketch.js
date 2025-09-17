@@ -1,154 +1,147 @@
-/* =================== Global */
-/* ======= Elements */
 var canvas = undefined;
 var ctx = undefined;
 var clearBtn = undefined;
 
-/* ======= Variables */
 // Flag for periodic inference request
 var sendFlag = false;
 
 // Last known position
 var pos = { x: 0, y: 0 };
-
 var offsets = { x: 0, y: 0 };
 
-
-/* =================== Functions */
-// Init
-function init() {
-    console.info('init')
+/*
+ * Initialize the script for the whole page.
+ */
+function init_script() {
+    console.info('init');
 
     // Elements init
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     clearBtn = document.getElementById('clear');
 
-    // resize(); // Must
-    clearCanvas()
+    resize();
 
-    // Elements event callbacks
-    clearBtn.addEventListener('click', clearCanvas)
-
-    // Variables
-    const rect = canvas.getBoundingClientRect();
-    offsets.x = rect.left
-    offsets.y = rect.top
-
-    // Drawing
+    // callbacks
+    clearBtn.addEventListener('click', clearCanvas);
     window.addEventListener('resize', resize);
     document.addEventListener('mousemove', draw);
     document.addEventListener('mousedown', setPosition);
     document.addEventListener('mouseenter', setPosition);
 
-    // Set intervall
-    setInterval(inferenceCallback, 1_000);
-    setInterval(standbyCallback, 2_000); // Set send to false after 10s
-}
-
-
-
-
-
-
-
-// Request data
-async function requestInference(img) {
-    const url = "http://127.0.0.1:4200/api/sketch"
-
-    try {
-        const res = await fetch(url, {
-            method: "POST",
-            headers: { "Content-Type": "image/jpeg" },
-            body: img,
-        });
-
-        if (!res.ok) {
-            throw new Error(`Response status: ${res.status}`);
+    // Send drawings to the server every second
+    setInterval(() => {
+        if (sendFlag) {
+            console.info('Timed callback - Sending');
+            canvas.toBlob((blob) => process_drawing(blob), "image/jpeg");
         }
-
-        // Get JSON response
-        const response = await res.json();
-        console.log(response);
-
-        // Perform actions
-            // Draw chart
-            // Write text
-        // document.getElementById("best-class").innerHTML = `${response[0][0]['label']} - (${response[0][0]['conf']})`
-        document.getElementById("best-class").innerHTML = `${response[0]['top'][0]['label']}`
-
-    } catch (error) {
-        console.error(error.message);
-    }
+    }, 1_000);
+    // Stop sending drawings to the server after two seconds of inactivity
+    setInterval(() => {
+        sendFlag = false;
+    }, 2_000);
 }
 
-
-
-
-
-// new position from mouse event
+/*
+ * Set new mouse position.
+ */
 function setPosition(e) {
     // Removing offsets
     pos.x = e.clientX - offsets.x;
     pos.y = e.clientY - offsets.y;
 }
 
-// Resize canvas
-function resize() {
-    ctx.canvas.width = window.innerWidth;
-    ctx.canvas.height = window.innerHeight;
-    clearCanvas()
+/*
+ * Clear the canvas.
+ */
+function clearCanvas() {
+    console.log('clear canvas')
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    document.getElementById('best-class-box').style.visibility = 'hidden';
 }
 
-// Draw on canvas
+/*
+ * Resize the canvas.
+ */
+function resize() {
+    const parent = document.getElementById('sketch-area');
+    ctx.canvas.width = parent.clientWidth;
+    ctx.canvas.height = parent.clientHeight;
+
+    const rect = canvas.getBoundingClientRect();
+    offsets.x = rect.left;
+    offsets.y = rect.top;
+    clearCanvas();
+}
+
+/*
+ * Draw on the canvas.
+ */
 function draw(e) {
     // mouse left button must be pressed
-    if (e.buttons !== 1) return;
+    if (e.buttons !== 1) {
+        return;
+    }
 
-    sendFlag = true
+    sendFlag = true;
 
-    ctx.beginPath(); // begin
-
-    ctx.lineWidth = 1;
+    // begin
+    ctx.beginPath();
+    ctx.lineWidth = 5;
     ctx.lineCap = 'round';
     ctx.strokeStyle = '#000' //'#1f1f1f';
-
     ctx.moveTo(pos.x, pos.y); // from
     setPosition(e);
     ctx.lineTo(pos.x, pos.y); // to
-
     ctx.stroke(); // draw it!
 }
 
+/*
+ * Send drawing to the server for processing
+ */
+async function requestInference(img) {
+    const url = "http://127.0.0.1:4200/api/sketch";
 
-// Clear canvas
-function clearCanvas() {
-    console.log('clear')
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-    
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-}
+    const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "image/jpeg" },
+        body: img,
+    });
 
-
-// Timed callback
-function inferenceCallback() {
-    // console.info('[Inference] Timed callback')
-    
-    if (sendFlag) {
-        console.info('Timed callback - Sending')
-        
-        canvas.toBlob((blob) => requestInference(blob), "image/jpeg")
-        // img = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
-        
-
-        // // Send
-        // requestInference(img)
+    if (!res.ok) {
+        throw new Error(`${res.status} - ${res.statusText}`);
     }
+
+    // Get JSON response
+    const response = await res.json();
+    return response;
 }
 
-function standbyCallback() {
-    // console.info('[Stand-By] Timed callback')
-    
-    sendFlag = false
+/*
+ * Process the drawing.
+ */
+async function process_drawing(img) {
+    try {
+        const response = await requestInference(img);
+        const top = response[0]['top'];
+
+        const best_box = document.getElementById('best-class-box')
+        best_box.style.visibility = 'visible';
+        best_box.innerHTML = "";
+        top.forEach((e, idx) => {
+            const label = e['label'].toUpperCase();
+            const conf = e['conf'].toFixed(2);
+            const text_element = document.createElement('p');
+            text_element.className = "result";
+            text_element.textContent = `${label} - ${conf}%`;
+            text_element.style.fontSize = `${24 - 3 * idx}px`;
+            best_box.appendChild(text_element);
+        });
+    } catch (error) {
+        console.error(error.message);
+    }
 }

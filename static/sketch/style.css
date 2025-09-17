@@ -5,13 +5,13 @@
     --font-weight-semi-bold: 600;
     --font-weight-bold: 700;
 
-    --color-primary: #455E91;
+    --color-primary:  #6D5E0F;
     --color-on-primary: #FFFFFF;
-    --color-primary-container: #D9E2FF;
-    --color-on-primary-container: #2D4678;
-    --color-background: #FAF9FF;
-    --color-surface-variant: #E1E2EC;
-    --color-outline: #757780;
+    --color-primary-container:  #F8E287;
+    --color-on-primary-container: #534600;
+    --color-background: #FFF9EE;
+    --color-surface-variant: #EAE2D0;
+    --color-outline: #7C7767;
 }
 
 html,
@@ -41,23 +41,4 @@ p {
 
     padding: 0;
     margin: 0;
-}
-
-.page-content {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-
-    width: 100vw;
-    min-height: 0;
-}
-
-.bottom-elements {
-    display: flex;
-    flex: 0 0 auto;
-    flex-direction: column;
-    align-items: center;
-    gap: 40px;
-
-    padding: 40px 0px;
 }

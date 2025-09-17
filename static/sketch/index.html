@@ -1,27 +1,48 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
-  <title>Sketch Classifier</title>
+  <title>Sketch</title>
+
+  <!-- Import CSS -->
+  <link rel="stylesheet" href="sketch/style.css">
+  <link rel="stylesheet" href="sketch/header.css">
+  <link rel="stylesheet" href="sketch/canvas.css">
+  <link rel="stylesheet" href="sketch/result.css">
   <style>
     canvas {
-      border: 2px solid black;
+      /* border: 2px solid black; */
       cursor: crosshair;
-    }
-    #controls {
-      margin-top: 10px;
     }
   </style>
 
+  <!-- Import scripts -->
   <script src="sketch/sketch.js"></script>
 </head>
 
-<body onload="init()">
-  <h2>Draw on the canvas</h2>
-  <h5 id="best-class">bfds</h5>
-  <canvas id="canvas" width="400" height="300"></canvas>
-  <div id="controls">
-    <button id="clear">Clear</button>
+<body onload="init_script()">
+  <header>
+    <div class="header-content">
+      <div>
+        <img class="header-logo" src="assets/logo_uniurb.svg" alt="Logo Uniurb" />
+      </div>
+      <div>
+        <img class="header-logo" src="assets/logo_sharper.png" alt="Logo Sharper" />
+      </div>
+      <p class="header-title">Scopriamo l'intelligenza artificiale - Sketch</p>
+    </div>
+    <button class="clear-btn" id="clear">
+      <img class="clear-btn-icon" src="assets/clear_icon.svg" />
+    </button>
+  </header>
+
+  <div id="sketch-area" class="sketch-area">
+    <canvas id="canvas" width="400" height="300" class="sketch-canvas"></canvas>
+  </div>
+  <div id="best-class-box" class="result-container">
+    <!-- <p class="result" id="best-class"></p> -->
   </div>
 </body>
+
 </html>

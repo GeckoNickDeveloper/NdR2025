@@ -1,0 +1,24 @@
+.result-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    /* right: 0; */
+    margin: auto;
+
+    visibility: hidden;
+
+    width: fit-content;
+    height: fit-content;
+
+    padding: 24px;
+    margin: 24px;
+    border-radius: 12px;
+    border: 2px solid var(--color-primary);
+    background: var(--color-background);
+}
+
+.result {
+    font-family: var(--font-plain);
+    font-size: 18px;
+    font-weight: var(--font-weight-semi-bold);
+}
