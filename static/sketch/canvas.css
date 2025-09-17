@@ -1,14 +1,26 @@
 .sketch-area {
     flex: 1 1 auto;
     min-height: 0;
-    /* width: 100vw; */
-    /* height: 100%; */
     display: flex;
+    position: relative;
 }
 
 .sketch-canvas {
-    flex: 1;
+    position: absolute;
+    top: 0;
+    bottom: 0;
     width: 100% !important;
     height: 100% !important;
     display: block;
+}
+
+#canvas-hidden {
+    visibility: hidden;
+}
+
+#canvas {
+    background: #fff9fd;
+    background-image: radial-gradient(#e5e7eb 1px, transparent 0);
+    background-size: 25px 25px;
+    /* background-position: -19px -19px; */
 }

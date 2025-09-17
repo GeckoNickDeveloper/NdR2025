@@ -1,5 +1,7 @@
 var canvas = undefined;
+var canvas_hidden = undefined;
 var ctx = undefined;
+var ctx_hidden = undefined;
 var clearBtn = undefined;
 
 // Flag for periodic inference request
@@ -17,7 +19,9 @@ function init_script() {
 
     // Elements init
     canvas = document.getElementById('canvas');
+    canvas_hidden = document.getElementById('canvas-hidden');
     ctx = canvas.getContext('2d');
+    ctx_hidden = canvas_hidden.getContext('2d');
     clearBtn = document.getElementById('clear');
 
     resize();
@@ -33,7 +37,7 @@ function init_script() {
     setInterval(() => {
         if (sendFlag) {
             console.info('Timed callback - Sending');
-            canvas.toBlob((blob) => process_drawing(blob), "image/jpeg");
+            canvas_hidden.toBlob((blob) => process_drawing(blob), "image/jpeg");
         }
     }, 1_000);
     // Stop sending drawings to the server after two seconds of inactivity
@@ -57,9 +61,12 @@ function setPosition(e) {
 function clearCanvas() {
     console.log('clear canvas')
     ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // ctx.fillStyle = '#fffdf9';
+    // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = '#fff';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    ctx_hidden.clearRect(0, 0, canvas_hidden.width, canvas_hidden.height);
+    ctx_hidden.fillStyle = '#fff';
+    ctx_hidden.fillRect(0, 0, canvas_hidden.width, canvas_hidden.height);
 
     document.getElementById('best-class-box').style.visibility = 'hidden';
 }
@@ -71,6 +78,8 @@ function resize() {
     const parent = document.getElementById('sketch-area');
     ctx.canvas.width = parent.clientWidth;
     ctx.canvas.height = parent.clientHeight;
+    ctx_hidden.canvas.width = parent.clientWidth;
+    ctx_hidden.canvas.height = parent.clientHeight;
 
     const rect = canvas.getBoundingClientRect();
     offsets.x = rect.left;
@@ -89,15 +98,28 @@ function draw(e) {
 
     sendFlag = true;
 
-    // begin
     ctx.beginPath();
+    ctx_hidden.beginPath();
+
     ctx.lineWidth = 5;
+    ctx_hidden.lineWidth = 5;
+
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#000' //'#1f1f1f';
+    ctx_hidden.lineCap = 'round';
+
+    ctx.strokeStyle = '#01081B' //'#1f1f1f';
+    ctx_hidden.strokeStyle = '#000000'
+
     ctx.moveTo(pos.x, pos.y); // from
+    ctx_hidden.moveTo(pos.x, pos.y); // from
+
     setPosition(e);
+
     ctx.lineTo(pos.x, pos.y); // to
+    ctx_hidden.lineTo(pos.x, pos.y); // to
+
     ctx.stroke(); // draw it!
+    ctx_hidden.stroke(); // draw it!
 }
 
 /*
@@ -128,7 +150,7 @@ async function process_drawing(img) {
     try {
         const response = await requestInference(img);
         const top = response[0]['top'];
-
+        
         const best_box = document.getElementById('best-class-box')
         best_box.style.visibility = 'visible';
         best_box.innerHTML = "";

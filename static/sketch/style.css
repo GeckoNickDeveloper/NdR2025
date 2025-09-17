@@ -5,13 +5,13 @@
     --font-weight-semi-bold: 600;
     --font-weight-bold: 700;
 
-    --color-primary:  #6D5E0F;
+    --color-primary:  #774F83;
     --color-on-primary: #FFFFFF;
-    --color-primary-container:  #F8E287;
-    --color-on-primary-container: #534600;
-    --color-background: #FFF9EE;
-    --color-surface-variant: #EAE2D0;
-    --color-outline: #7C7767;
+    --color-primary-container:  #FAD7FF;
+    --color-on-primary-container: #5E386A;
+    --color-background: #FFF7FB;
+    --color-surface-variant: #EBDFE9;
+    --color-outline: #7E747D;
 }
 
 html,

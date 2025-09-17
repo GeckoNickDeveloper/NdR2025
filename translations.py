@@ -287,7 +287,7 @@ translations = {
     "steak": "bistecca",
     "stereo": "stereo",
     "stethoscope": "stetoscopio",
-    "stitches": "punture",
+    "stitches": "cicatrice",
     "stop sign": "segnale di stop",
     "stove": "fornello",
     "strawberry": "fragola",
