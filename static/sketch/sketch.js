@@ -29,9 +29,17 @@ function init_script() {
     // callbacks
     clearBtn.addEventListener('click', clearCanvas);
     window.addEventListener('resize', resize);
-    document.addEventListener('mousemove', draw);
-    document.addEventListener('mousedown', setPosition);
-    document.addEventListener('mouseenter', setPosition);
+    // document.addEventListener('mousemove', draw);
+    // document.addEventListener('mousedown', setPosition);
+    // document.addEventListener('mouseenter', setPosition);
+    // document.addEventListener('touchmove', draw);
+    // document.addEventListener('touchstart', setPosition);
+    // document.addEventListener('touchend', setPosition);
+    canvas.addEventListener('pointerenter', setPosition);
+    canvas.addEventListener('pointerdown', setPosition);
+    canvas.addEventListener('pointermove', draw);
+    canvas.addEventListener('pointercancel', (e) => { console.log(e) });
+    canvas.addEventListener('touchstart', (e) => { e.preventDefault() });
 
     // Send drawings to the server every second
     setInterval(() => {
@@ -50,6 +58,7 @@ function init_script() {
  * Set new mouse position.
  */
 function setPosition(e) {
+
     // Removing offsets
     pos.x = e.clientX - offsets.x;
     pos.y = e.clientY - offsets.y;
@@ -61,8 +70,6 @@ function setPosition(e) {
 function clearCanvas() {
     console.log('clear canvas')
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-    // ctx.fillStyle = '#fffdf9';
-    // ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     ctx_hidden.clearRect(0, 0, canvas_hidden.width, canvas_hidden.height);
     ctx_hidden.fillStyle = '#fff';
@@ -96,6 +103,8 @@ function draw(e) {
         return;
     }
 
+    // console.warn(e);
+
     sendFlag = true;
 
     ctx.beginPath();
@@ -126,7 +135,7 @@ function draw(e) {
  * Send drawing to the server for processing
  */
 async function requestInference(img) {
-    const url = "http://127.0.0.1:4200/api/sketch";
+    const url = `${document.location.origin}/api/sketch`;
 
     const res = await fetch(url, {
         method: "POST",
@@ -150,7 +159,7 @@ async function process_drawing(img) {
     try {
         const response = await requestInference(img);
         const top = response[0]['top'];
-        
+
         const best_box = document.getElementById('best-class-box')
         best_box.style.visibility = 'visible';
         best_box.innerHTML = "";

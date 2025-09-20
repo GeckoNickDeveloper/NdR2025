@@ -24,6 +24,10 @@
     border-radius: 10px;
 }
 
+input[type="text"] {
+    font-size: 22px;
+}
+
 .chat-input-textarea {
     width: 100%;
 

@@ -8,6 +8,28 @@ header {
     background: var(--color-primary-container);
 }
 
+.header-titles {
+    display: flex;
+    flex-direction: column;
+}
+
+.header-title {
+    color: var(--color-on-primary-container);
+
+    font-family: var(--font-plain);
+    font-weight: var(--font-weight-semi-bold);
+    font-display: block;
+    font-size: 34px;
+}
+
+.header-subtitle {
+    color: var(--color-on-primary-container);
+
+    font-family: var(--font-plain);
+    font-weight: var(500);
+    font-size: 28px;
+}
+
 .header-title {
     color: var(--color-on-primary-container);
 

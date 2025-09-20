@@ -9,12 +9,13 @@
 }
 
 .token-container {
+    text-align: center;
     width: fit-content;
     height: fit-content;
 
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 0px;
 
     background: red;
     padding: 10px 16px;
@@ -25,11 +26,11 @@
 .token-text {
     font-family: var(--font-plain);
     font-weight: var(--font-weight-bold);
-    font-size: 12px;
+    font-size: 18px;
 }
 
 .token-id {
     font-family: var(--font-plain);
-    font-size: 10px;
+    font-size: 16px;
     font-weight: var(--font-weight-regular);
 }

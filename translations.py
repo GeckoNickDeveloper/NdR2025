@@ -79,7 +79,7 @@ translations = {
     "compass": "bussola",
     "computer": "computer",
     "cookie": "biscotto",
-    "cooler": "frigorifero portatile",
+    "cooler": "frigorifero",
     "couch": "divano",
     "cow": "mucca",
     "crab": "granchio",

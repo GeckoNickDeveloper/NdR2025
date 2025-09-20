@@ -19,12 +19,17 @@ class MissingMaskError extends Error {
         super("input text is missing [MASK]");
     }
 }
+class TooMuchMaskError extends Error {
+    constructor() {
+        super("input text have too much [MASK]s");
+    }
+}
 
 /*
  * Query the server for an object with predicted tokens.
  */
 async function fetch_tokens(text) {
-    const url = "http://127.0.0.1:4200/api/llm"
+    const url = `${document.location.origin}/api/llm`
 
     const res = await fetch(url, {
         method: "POST",
@@ -35,6 +40,8 @@ async function fetch_tokens(text) {
     if (!res.ok) {
         if (res.status == 418) {
             throw new MissingMaskError();
+        } else if (res.status == 419) {
+            throw new TooMuchMaskError();
         } else {
             throw new Error(`${res.status} - ${res.statusText}`);
         }
@@ -59,7 +66,8 @@ async function process_text() {
     let text = document.getElementById('chat-input').value;
     // text = "Lorem ipsum dolor sit amet, [MASK] adipiscing elit."
     console.log(`input: ${text}`);
-
+    text = text.replaceAll("#","[MASK]");
+    
     // skip processing empty text
     if (!text || text.length === 0) {
         return
@@ -68,8 +76,13 @@ async function process_text() {
     try {
         // get tokens from server
         const response = await fetch_tokens(text);
-        const tokens = response['tokens'];
+        let tokens = response['tokens'];
         const pred_tokens = response['predictions'];
+
+        tokens = tokens.filter((e) => (e.id !== 102 && e.id !== 103));
+        const mask_idx = tokens.findIndex((e) => e.id === 104);
+        tokens[mask_idx].text = "#";
+        tokens.forEach((e) => { console.log(e) });
 
         // assign color to tokens
         tokens.forEach((e) => { e.color = get_token_color(e) });
@@ -92,12 +105,14 @@ async function process_text() {
         update_plot(pred_tokens);
 
         // reset the input text
-        document.getElementById('chat-input').value = "";
+        // document.getElementById('chat-input').value = "";
     } catch (error) {
         console.error(error);
 
         if (error instanceof MissingMaskError) {
-            alert('Il testo deve contenere la maschera [MASK]');
+            alert("Il testo deve contenere la maschera '#'");
+        } else if (error instanceof TooMuchMaskError) {
+            alert("Il testo non deve contenere piu' di una maschera '#'");
         } else {
             alert(`Errore sconosciuto ${error}`);
         }
@@ -177,7 +192,8 @@ function display_tokens(tokens) {
     const tokens_element = document.getElementById('tokens-list');
     tokens_element.innerHTML = "";
 
-    tokens.forEach((token) => {
+    last_tokens = tokens.slice(-10);
+    last_tokens.forEach((token) => {
         const t_container = document.createElement('div');
         t_container.className = 'token-container'
         t_container.style.background = token.color;
@@ -188,7 +204,7 @@ function display_tokens(tokens) {
 
         const t_id = document.createElement('p');
         t_id.className = 'token-id';
-        t_id.textContent = token.id;
+        t_id.textContent = `[${token.id}]`;
 
         t_container.appendChild(t_text);
         t_container.appendChild(t_id);
@@ -210,7 +226,7 @@ function create_plot() {
         data: {
             labels: [],
             datasets: [{
-                label: 'Confidenza',
+                // label: 'Confidenza',
                 data: [],
                 borderRadius: 5
             }]
@@ -221,7 +237,7 @@ function create_plot() {
                 x: {
                     type: 'linear',
                     min: 0,
-                    max: 100,
+                    // max: 100,
                     ticks: {
                         font: {
                             size: 20
@@ -231,19 +247,21 @@ function create_plot() {
                 y: {
                     ticks: {
                         font: {
-                            size: 20
+                            size: 24
                         }
                     }
                 }
             },
             plugins: {
+                title: {
+                    text: "Parola predetta",
+                    display: true,
+                    font: {
+                        size: 24
+                    }
+                },
                 legend: {
-                    labels: {
-                        font: {
-                            size: 25
-                        }
-                    },
-                    display: true
+                    display: false
                 }
             },
             responsive: true,
@@ -260,7 +278,7 @@ function update_plot(pred_tokens) {
     // Make plot visible
     document.getElementById('plot-canvas').style.visibility = 'visible';
 
-    const labels = pred_tokens.map((e) => { return e.text });
+    const labels = pred_tokens.map((e) => { return `${e.text} [${e.id}]` });
     const data = pred_tokens.map((e) => { return e.confidence });
     const color = pred_tokens.map((e) => { return e.color });
     plot_chart.data.labels = labels;
