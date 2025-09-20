@@ -1,4 +1,6 @@
 import os
+import logging
+from colorlog import ColoredFormatter
 
 from translations import translations
 
@@ -11,6 +13,25 @@ from transformers import BeitImageProcessor, BeitForImageClassification
 import torch
 
 from PIL import Image
+
+# Create and initialize a named logger
+def init_logger(name: str):
+    LOGFORMAT = "%(log_color)s%(name)-8s| %(funcName)s | %(message)s%(reset)s"
+    LOG_COLORS = {
+        'DEBUG': 'cyan',
+        'INFO': 'green',
+        'WARNING': 'yellow',
+        'ERROR': 'red',
+        'CRITICAL': 'bold_red',
+    }
+
+    logger = logging.getLogger(name)
+    formatter = ColoredFormatter(LOGFORMAT, log_colors=LOG_COLORS)
+    logger.setLevel(logging.INFO)
+    handler = logging.StreamHandler()
+    handler.setFormatter(formatter)
+    logger.addHandler(handler)
+    return logger
 
 # Download the LLM model from Hugging Face
 def download_llm(id, path):
@@ -28,53 +49,76 @@ def download_sketch(id, path):
     processor.save_pretrained(path)
     model.save_pretrained(path)
 
+class NoMaskException(Exception): pass    
+class TooMuchMaskException(Exception): pass
+
 # Process request from LLM API
 def process_llm():
     try:
         # Read raw text data
         raw_data = request.get_data(as_text=True).strip()
-        print(f"LLM: {raw_data=}")
-        
-        if "[MASK]" not in raw_data:
-            return ("text must contain a mask token", 418)
+        llm_logger.debug(f"{raw_data=}")
         
         inference_result = inference_llm(raw_data)
-        print(f"LLM: {inference_result}")
+        llm_logger.debug(f"{inference_result=}")
         return (jsonify(inference_result), 200)
+    except NoMaskException:
+        return ("text must contain a mask token", 418)
+    except TooMuchMaskException:
+        return ("text must contain one mask token", 419)
     except Exception as e:
-        print(f"LLM: {e}")
+        llm_logger.error(e)
         return (jsonify({"error": str(e)}), 500)
 
 def inference_llm(text):
+    # tokenize input
     encoded_input = llm_tokenizer(text, return_tensors='pt')
-    output = llm_model(**encoded_input)
-
-    input = encoded_input['input_ids'][0].tolist()
-    print(f"LLM: {input=}")
-
-    logits = output.logits
-    # individua la posizione del token <mask>
-    mask_token_index = (encoded_input["input_ids"] == llm_tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0]
+    tokenized_input = encoded_input['input_ids'][0].tolist()
+    llm_logger.debug(f"{tokenized_input=}")
     
-    # softmax sulle probabilità
+    tokens = list(map(lambda t: {
+        'id': t,
+        'text': llm_tokenizer.decode([t])
+    }, tokenized_input))
+    llm_logger.debug(f"{tokens=}")
+   
+    # find position of [MASK] token
+    mask_token_index = (encoded_input["input_ids"] == llm_tokenizer.mask_token_id)[0].nonzero(as_tuple=True)[0]
+
+    # Ensure only one mask token is present
+    if mask_token_index.shape.numel() == 0:
+        llm_logger.error("input does not contain mask token!")
+        raise NoMaskException()
+    elif mask_token_index.shape.numel() > 1:
+        llm_logger.error("input contains too much mask tokens!")
+        raise TooMuchMaskException()
+            
+    # predict masked tokens
+    output = llm_model(**encoded_input)
+    logits = output.logits
+    
+    # softmax on probabilities
     softmax = torch.nn.functional.softmax(logits[0, mask_token_index, :], dim=-1)
+
+    # exclude special tokens from softmax
+    filtered = softmax.squeeze(0)
+    filtered[exclude_token_ids] = float('-inf')
+  
     # top 5 token
-    top_tokens = torch.topk(softmax, 5, dim=1).indices[0].tolist()
-
-    tokens = []
-    for i in input:
-        tokens.append({
-            'id': i, 
-            'text': llm_tokenizer.decode([i])
-        })
-
+    # top_tokens = torch.topk(softmax, 5, dim=1).indices[0].tolist()
+    top_vals, top_ids = torch.topk(filtered,5)
+    top_vals = top_vals.tolist()
+    top_ids = top_ids.tolist()
+    top_tok = llm_tokenizer.convert_ids_to_tokens(top_ids)
+    
     pred_tokens = []
-    for token in top_tokens:
+    for val, id, text in zip(top_vals,top_ids,top_tok):
         pred_tokens.append({
-            'id': token,
-            'text': llm_tokenizer.decode([token]),
-            'confidence': softmax[0, token].item() * 100
+            'id': id,
+            'text': text,
+            'confidence': val * 100
         })
+    llm_logger.debug(f"{pred_tokens=}")
 
     return {
         'tokens': tokens,
@@ -85,10 +129,16 @@ def process_sketch():
     try:
         # Open with PIL
         img = Image.open(request.stream).convert("RGB")
-        print(f"{img.width=} {img.height}")
+        sketch_logger.info(f"image size: {img.width}x{img.height}")
+        
+        # img = img.resize((400,300))
+        img.save("last_sketch.jpg")
+        
         inference_result = sketch_inference(img)
+        sketch_logger.info(f"{inference_result=}")
         return jsonify(inference_result, 200)
     except Exception as e:
+        sketch_logger.error(e)
         return (jsonify({"error": str(e)}), 500)
 
 def sketch_inference(image):
@@ -97,13 +147,8 @@ def sketch_inference(image):
     outputs = sketch_model(**inputs)
     logits = outputs.logits
 
-    # Get most confident class
-    # best_guess = { 'label': None, 'conf': 0.0 }
-
-    predicted_class_idx = logits.argmax(-1).item()
-    
     softmax = torch.nn.functional.softmax(logits[0, :], dim=-1)
-    confs, idxs = torch.topk(softmax, 5)#.tolist()
+    confs, idxs = torch.topk(softmax, 4)#.tolist()
 
     top_5 = []
     for i in range(len(confs)):
@@ -116,6 +161,8 @@ def sketch_inference(image):
         'top': top_5
     }
 
+llm_logger = init_logger("LLM")
+sketch_logger = init_logger("Sketch")
 llm_model_id = "dbmdz/bert-base-italian-xxl-cased"
 llm_path = "./models/llm"
 sketch_model_id = 'kmewhort/beit-sketch-classifier'
@@ -132,6 +179,9 @@ llm_tokenizer = AutoTokenizer.from_pretrained(llm_path)
 llm_model = AutoModelForMaskedLM.from_pretrained(llm_path)
 sketch_processor = BeitImageProcessor.from_pretrained(sketch_path)
 sketch_model = BeitForImageClassification.from_pretrained(sketch_path)
+
+exclude_tokens = [' ','!','"','#','$','%','&','\'','(',')','*','+',',','-','.','/',':',';','<','=','>','?','@','[','\\',']','^','_','`','{','|','}','~']
+exclude_token_ids = llm_tokenizer.convert_tokens_to_ids(exclude_tokens)
 
 # Create Flask app
 app = Flask(__name__, static_folder = 'static')
