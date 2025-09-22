@@ -10,6 +10,7 @@
   <link rel="stylesheet" href="sketch/header.css">
   <link rel="stylesheet" href="sketch/canvas.css">
   <link rel="stylesheet" href="sketch/result.css">
+  <link rel="stylesheet" href="sketch/fab.css">
   <style>
     canvas {
       /* border: 2px solid black; */
@@ -35,16 +36,16 @@
         <p class="header-subtitle">Come interpreta i disegni?</p>
       </div>
     </div>
-    <button class="clear-btn" id="clear">
-      <img class="clear-btn-icon" src="assets/clear_icon.svg" />
-    </button>
   </header>
-
+  
   <div id="sketch-area" class="sketch-area">
     <canvas id="canvas-hidden" width="400" height="300" class="sketch-canvas"></canvas>
     <canvas id="canvas" width="400" height="300" class="sketch-canvas"></canvas>
   </div>
   <div id="best-class-box" class="result-container"></div>
+  <button class="clear-btn" id="clear">
+    <img class="clear-btn-icon" src="assets/clear_icon.svg" />
+  </button>
 </body>
 
 </html>

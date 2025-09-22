@@ -41,30 +41,3 @@ header {
 .header-logo {
     height: 80px;
 }
-
-.clear-btn {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-
-    width: 48px;
-    height: 48px;
-
-    color: var(--color-on-primary);
-    background: var(--color-primary);
-    border: none;
-    border-radius: 10px;
-    padding: 0px;
-    cursor: pointer;
-}
-
-.clear-btn:active {
-    border-radius: 5px;
-    transition: all 0.1s ease-in-out;
-}
-
-.clear-btn-icon {
-    width: 24px;
-    height: 24px;
-}

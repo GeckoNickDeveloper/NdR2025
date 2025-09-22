@@ -1,0 +1,37 @@
+.clear-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    
+    position: absolute;
+    bottom: 0;
+    left: 0;
+
+    width: 56px;
+    height: 56px;
+    margin: 24px;
+
+    color: var(--color-on-primary);
+    background: var(--color-primary);
+    border: none;
+    border-radius: 16px;
+    padding: 0px;
+    cursor: pointer;
+
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2);
+}
+
+.clear-btn:hover {
+    box-shadow: 0 8px 16px 0 rgba(0,0,0,0.2), 0 6px 20px 0 rgba(0,0,0,0.19);
+    transition: all 0.2s ease-in-out;
+}
+
+.clear-btn:active {
+    border-radius: 5px;
+    transition: all 0.1s ease-in-out;
+}
+
+.clear-btn-icon {
+    width: 24px;
+    height: 24px;
+}
